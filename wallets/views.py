@@ -30,6 +30,7 @@ class WalletViewSet(mixins.CreateModelMixin,
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = "name"
 
     def create(self, request: Request):
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
