@@ -58,6 +58,19 @@ class TransactionViewSet(mixins.CreateModelMixin,
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
-from django.shortcuts import render
 
-# Create your views here.
+    def create(self, request: Request):
+        post_data = {
+            'sender': request.data['sender'],
+            'receiver': request.data['receiver'],
+            'transfer_amount': request.data['transfer_amount']
+        }
+        sender = Wallet.objects.filter(name=request.data['sender'])
+        receiver = Wallet.objects.filter(name=request.data['receiver'])
+        if not sender and not receiver:
+            return Response()
+        if sender.type != receiver.type:
+            return Response()
+        if sender.balance < post_data['transfer_amount']:
+            return Response()
+
