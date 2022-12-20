@@ -83,26 +83,33 @@ class TransactionViewSet(GenericViewSet,
             return Response(status=status.HTTP_400_BAD_REQUEST)
         with atomic():
             sender.balance = float(sender.balance) - float(post_data['transfer_amount'])
-            receiver.balance = float(receiver.balance) + float(post_data['transfer_amount'])
+            receiver.balance = float(
+                receiver.balance) + float(post_data['transfer_amount'])
             sender.save()
             receiver.save()
             _status = "PAID"
             serializer = self.get_serializer(data=post_data)
             serializer.is_valid(raise_exception=True)
             serializer.save(status=_status)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            headers = self.get_success_headers(
+                serializer.data)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=headers)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def list(self, request: Request, wallet_name=None) -> Response:
         """Get all transaction for wallet_name"""
-        queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
+        queryset = Transaction.objects.filter(
+            Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
         serializer = TransactionSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request: Request, wallet_name=None, pk=None) -> Response:
         """Get a detail transaction"""
-        queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
+        queryset = Transaction.objects.filter(
+            Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
         transaction = get_object_or_404(queryset, pk=pk)
         serializer = TransactionSerializer(transaction)
         return Response(serializer.data)
