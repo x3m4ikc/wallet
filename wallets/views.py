@@ -4,21 +4,16 @@ import random
 
 from django.db.transaction import atomic
 from django.db.models import Q
-from django.shortcuts import render
-import logging
 
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
-from rest_framework import viewsets, mixins, generics, status
-from rest_framework.decorators import api_view, action
+from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from wallets.models import Wallet, User, Transaction
 from wallets.serializers import WalletSerializer, UserSerializer, TransactionSerializer
-
-# logging.basicConfig(filename="log.log", level=logging.INFO, encoding='utf-8')
 
 
 def name() -> str:
