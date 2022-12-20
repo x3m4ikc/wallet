@@ -1,8 +1,10 @@
+"""Db models"""
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
 
 class User(AbstractUser):
+    """User model"""
     first_name = None
     last_name = None
     date_joined = None

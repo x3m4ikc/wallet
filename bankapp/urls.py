@@ -11,7 +11,6 @@ router.register(r'user', UserViewSet, basename='user')
 
 wallet_router = routers.NestedDefaultRouter(router, r'wallets', lookup='wallet')
 wallet_router.register(r'transactions', TransactionViewSet, basename='transactions')
-# router.register(r'wallets/transaction', TransactionViewSet, basename='transactions')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,5 +19,4 @@ urlpatterns = [
     path('drf-auth/', include('rest_framework.urls')),
     path('auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
-    # path('wallets/transaction/', TransactionViewSet.as_view())
 ]

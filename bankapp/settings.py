@@ -1,6 +1,4 @@
-"""
-Django settings for bankapp project.
-"""
+"""Django settings for bankapp project."""
 
 from pathlib import Path
 

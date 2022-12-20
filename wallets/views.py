@@ -1,3 +1,4 @@
+"""Views config"""
 import string
 import random
 
@@ -20,7 +21,8 @@ from wallets.serializers import WalletSerializer, UserSerializer, TransactionSer
 # logging.basicConfig(filename="log.log", level=logging.INFO, encoding='utf-8')
 
 
-def name():
+def name() -> str:
+    """Generate wallet name"""
     letters = string.ascii_uppercase + string.digits
     res = ''.join(random.choice(letters) for _ in range(8))
     return res
@@ -31,12 +33,14 @@ class WalletViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.RetrieveModelMixin,
                     GenericViewSet):
+    """Wallet ViewSet"""
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "name"
 
-    def create(self, request: Request):
+    def create(self, request: Request) -> Response:
+        """Post wallet"""
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
         #        logging.info(post_data)
         if post_data['currency'] == 'RUB':
@@ -51,6 +55,7 @@ class WalletViewSet(mixins.CreateModelMixin,
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """User ViewSet"""
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -59,11 +64,13 @@ class TransactionViewSet(GenericViewSet,
                          mixins.CreateModelMixin,
                          mixins.ListModelMixin,
                          mixins.RetrieveModelMixin):
+    """Transaction ViewSet"""
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request: Request, wallet_name=None):
+    def create(self, request: Request, wallet_name=None) -> Response:
+        """Post transaction"""
         post_data = {
             'sender': request.data['sender'],
             'receiver': request.data['receiver'],
@@ -92,12 +99,14 @@ class TransactionViewSet(GenericViewSet,
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def list(self, request, wallet_name=None):
+    def list(self, request: Request, wallet_name=None) -> Response:
+        """Get all transaction for wallet_name"""
         queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
         serializer = TransactionSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, wallet_name=None, pk=None):
+    def retrieve(self, request: Request, wallet_name=None, pk=None) -> Response:
+        """Get a detail transaction"""
         queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
         transaction = get_object_or_404(queryset, pk=pk)
         serializer = TransactionSerializer(transaction)

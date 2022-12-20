@@ -1,3 +1,4 @@
+"""Serializers"""
 from rest_framework import serializers
 from wallets.models import Wallet, User, Transaction
 
