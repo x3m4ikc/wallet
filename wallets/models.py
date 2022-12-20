@@ -1,8 +1,10 @@
+"""Db models"""
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
 
 class User(AbstractUser):
+    """User model"""
     first_name = None
     last_name = None
     date_joined = None
@@ -34,9 +36,6 @@ class Wallet(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-
-    def __str__(self):
-        return self.name
 
 
 class Transaction(models.Model):
