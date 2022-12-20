@@ -1,9 +1,12 @@
 import string
 import random
 
-from django.db import transaction
+from django.db.transaction import atomic
+from django.db.models import Q
 from django.shortcuts import render
 import logging
+
+from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework import viewsets, mixins, generics, status
 from rest_framework.decorators import api_view, action
@@ -60,7 +63,7 @@ class TransactionViewSet(GenericViewSet,
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request: Request):
+    def create(self, request: Request, wallet_name=None):
         post_data = {
             'sender': request.data['sender'],
             'receiver': request.data['receiver'],
@@ -76,7 +79,7 @@ class TransactionViewSet(GenericViewSet,
             commission = post_data['transfer_amount'] * 0.1
         if sender.balance < (float(post_data['transfer_amount']) + commission):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        with transaction.atomic():
+        with atomic():
             sender.balance = float(sender.balance) - float(post_data['transfer_amount'])
             receiver.balance = float(receiver.balance) + float(post_data['transfer_amount'])
             sender.save()
@@ -88,3 +91,14 @@ class TransactionViewSet(GenericViewSet,
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def list(self, request, wallet_name=None):
+        queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
+        serializer = TransactionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, wallet_name=None, pk=None):
+        queryset = Transaction.objects.filter(Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
+        transaction = get_object_or_404(queryset, pk=pk)
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)

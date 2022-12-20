@@ -16,6 +16,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    parent_lookup_kwargs = {
+        'wallet_pk': 'wallet__pk',
+    }
     class Meta:
         model = Transaction
         fields = "__all__"
