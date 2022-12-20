@@ -8,7 +8,7 @@ from wallets.views import WalletViewSet, TransactionViewSet, UserViewSet
 router = routers.DefaultRouter()
 router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'user', UserViewSet, basename='user')
-router.register(r'wallets/transaction', TransactionViewSet, basename='transaction')
+router.register(r'transaction', TransactionViewSet, basename='transaction')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -16,5 +16,5 @@ urlpatterns = [
     path('drf-auth/', include('rest_framework.urls')),
     path('auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.authtoken')),
-#    path('wallets/<name:slug>', WalletViewSet)
+    # path('wallets/transaction/', TransactionViewSet.as_view())
 ]

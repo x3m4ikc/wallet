@@ -1,6 +1,7 @@
 import string
 import random
 
+from django.db import transaction
 from django.shortcuts import render
 import logging
 from rest_framework.request import Request
@@ -34,7 +35,7 @@ class WalletViewSet(mixins.CreateModelMixin,
 
     def create(self, request: Request):
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
-#        logging.info(post_data)
+        #        logging.info(post_data)
         if post_data['currency'] == 'RUB':
             balance = 100.00
         else:
@@ -51,10 +52,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-class TransactionViewSet(mixins.CreateModelMixin,
+class TransactionViewSet(GenericViewSet,
+                         mixins.CreateModelMixin,
                          mixins.ListModelMixin,
-                         mixins.RetrieveModelMixin,
-                         GenericViewSet):
+                         mixins.RetrieveModelMixin):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
@@ -63,14 +64,27 @@ class TransactionViewSet(mixins.CreateModelMixin,
         post_data = {
             'sender': request.data['sender'],
             'receiver': request.data['receiver'],
-            'transfer_amount': request.data['transfer_amount']
+            'transfer_amount': request.data['transfer_amount'],
         }
-        sender = Wallet.objects.filter(name=request.data['sender'])
-        receiver = Wallet.objects.filter(name=request.data['receiver'])
-        if not sender and not receiver:
-            return Response()
-        if sender.type != receiver.type:
-            return Response()
-        if sender.balance < post_data['transfer_amount']:
-            return Response()
-
+        sender = Wallet.objects.get(pk=request.data['sender'])
+        receiver = Wallet.objects.get(pk=request.data['receiver'])
+        if sender.currency != receiver.currency:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if sender.owner == receiver.owner:
+            commission = 0
+        else:
+            commission = post_data['transfer_amount'] * 0.1
+        if sender.balance < (float(post_data['transfer_amount']) + commission):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            sender.balance = float(sender.balance) - float(post_data['transfer_amount'])
+            receiver.balance = float(receiver.balance) + float(post_data['transfer_amount'])
+            sender.save()
+            receiver.save()
+            _status = "PAID"
+            serializer = self.get_serializer(data=post_data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(status=_status)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)

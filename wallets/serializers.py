@@ -19,8 +19,4 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = "__all__"
-        extra_kwargs = {
-            'sender': {'write_only': True},
-            'receiver': {'write_only': True},
-            'transfer_amount': {'write_only': True},
-        }
+        read_only_fields = ("status", "commission")

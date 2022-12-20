@@ -42,8 +42,8 @@ class Wallet(models.Model):
 class Transaction(models.Model):
     """Model transaction"""
     PAID_OR_FAILED = (
-        ("True", "PAID"),
-        ("False", "FAILED")
+        ("PAID", "PAID"),
+        ("FAILED", "FAILED")
     )
 
     sender = models.ForeignKey(Wallet,
