@@ -4,6 +4,7 @@ from wallets.models import Wallet, User, Transaction
 
 
 class WalletSerializer(serializers.ModelSerializer):
+    """Wallet Serializer"""
     class Meta:
         model = Wallet
         fields = "__all__"
@@ -11,12 +12,14 @@ class WalletSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """User Serializer"""
     class Meta:
         model = User
         fields = ['password', 'username', 'email']
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    """Transaction Serializer"""
     parent_lookup_kwargs = {
         'wallet_pk': 'wallet__pk',
     }

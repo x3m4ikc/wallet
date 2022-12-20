@@ -1,6 +1,7 @@
 """Views config"""
 import string
 import random
+from typing import Any
 
 from django.db.transaction import atomic
 from django.db.models import Q
@@ -34,7 +35,7 @@ class WalletViewSet(mixins.CreateModelMixin,
     permission_classes = [IsAuthenticated]
     lookup_field = "name"
 
-    def create(self, request: Request) -> Response:
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Post wallet"""
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
         #        logging.info(post_data)
@@ -64,7 +65,8 @@ class TransactionViewSet(GenericViewSet,
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request: Request, wallet_name=None) -> Response:
+    def create(self, request: Request, wallet_name=None,
+               *args: Any, **kwargs: Any) -> Response:
         """Post transaction"""
         post_data = {
             'sender': request.data['sender'],
@@ -99,14 +101,16 @@ class TransactionViewSet(GenericViewSet,
                 headers=headers)
         return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def list(self, request: Request, wallet_name=None) -> Response:
+    def list(self, request: Request, wallet_name=None,
+             *args: Any, **kwargs: Any) -> Response:
         """Get all transaction for wallet_name"""
         queryset = Transaction.objects.filter(
             Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
         serializer = TransactionSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request: Request, wallet_name=None, pk=None) -> Response:
+    def retrieve(self, request: Request, wallet_name=None,
+                 pk=None, *args: Any, **kwargs: Any) -> Response:
         """Get a detail transaction"""
         queryset = Transaction.objects.filter(
             Q(sender__name=wallet_name) | Q(receiver__name=wallet_name))
