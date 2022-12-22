@@ -1,9 +1,11 @@
 """Django settings for bankapp project."""
-
 from pathlib import Path
+import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 SECRET_KEY = 'django-insecure-d$#a_ksqd30*(kpj4%0i9w(7@8b**w0@c)7-6xe@ao_=5!bje4'
 
@@ -22,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'tests.api.apps.TestsConfig',
 ]
 
 MIDDLEWARE = [
@@ -80,7 +83,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Europe/Moscow'
 

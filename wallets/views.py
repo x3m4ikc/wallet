@@ -38,7 +38,6 @@ class WalletViewSet(mixins.CreateModelMixin,
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Post wallet"""
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
-        #        logging.info(post_data)
         if post_data['currency'] == 'RUB':
             balance = 100.00
         else:
