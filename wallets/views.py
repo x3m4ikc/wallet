@@ -37,6 +37,9 @@ class WalletViewSet(mixins.CreateModelMixin,
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Post wallet"""
+        print(request.user)
+        if len(Wallet.objects.filter(owner=request.user)) > 4:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
         if post_data['currency'] == 'RUB':
             balance = 100.00
