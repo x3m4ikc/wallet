@@ -37,8 +37,7 @@ class WalletViewSet(mixins.CreateModelMixin,
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         """Post wallet"""
-        print(request.user)
-        if len(Wallet.objects.filter(owner=request.user)) > 4:
+        if (Wallet.objects.filter(owner=request.user).count()) > 4:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         post_data = {'type': request.data['type'], 'currency': request.data['currency']}
         if post_data['currency'] == 'RUB':
@@ -81,22 +80,22 @@ class TransactionViewSet(GenericViewSet,
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if sender.owner == receiver.owner:
             commission = 0
+            print("here")
         else:
-            commission = post_data['transfer_amount'] * 0.1
+            commission = float(post_data['transfer_amount']) * 0.1
         if sender.balance < (float(post_data['transfer_amount']) + commission):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         with atomic():
-            sender.balance = float(sender.balance) - float(post_data['transfer_amount'])
-            receiver.balance = float(
-                receiver.balance) + float(post_data['transfer_amount'])
+            transfer = float(post_data['transfer_amount']) + commission
+            sender.balance = float(sender.balance) - transfer
+            receiver.balance = float(receiver.balance) + float(post_data['transfer_amount'])
             sender.save()
             receiver.save()
             _status = "PAID"
             serializer = self.get_serializer(data=post_data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(status=_status)
-            headers = self.get_success_headers(
-                serializer.data)
+            serializer.save(status=_status, commission=commission)
+            headers = self.get_success_headers(serializer.data)
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED,

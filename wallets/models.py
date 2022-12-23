@@ -37,6 +37,9 @@ class Wallet(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
+    def __str__(self):
+        return self.name
+
 
 class Transaction(models.Model):
     """Model transaction"""

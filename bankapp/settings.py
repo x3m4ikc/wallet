@@ -1,4 +1,5 @@
 """Django settings for bankapp project."""
+# flake8: noqa
 from pathlib import Path
 import os
 
