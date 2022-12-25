@@ -1,6 +1,7 @@
 """Views config"""
 import string
 import random
+from retry import retry
 from typing import Any
 
 from django.db.transaction import atomic
@@ -17,10 +18,13 @@ from wallets.models import Wallet, User, Transaction
 from wallets.serializers import WalletSerializer, UserSerializer, TransactionSerializer
 
 
+@retry(ValueError)
 def name() -> str:
     """Generate wallet name"""
     letters = string.ascii_uppercase + string.digits
     res = ''.join(random.choice(letters) for _ in range(8))
+    if not any(digit in res for digit in string.digits):
+        raise ValueError("Unacceptable name")
     return res
 
 
