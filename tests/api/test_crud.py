@@ -24,6 +24,7 @@ def created_wallet(authorized_client):
     return response
 
 
+# @pytest.mark.xfail
 @pytest.mark.django_db
 @pytest.mark.parametrize("payload, result",
                          [({"type": "VISA", "currency": "USD"}, 201),
@@ -36,6 +37,7 @@ def test_create_wallet(payload, result, authorized_client):
     assert response.status_code == result
 
 
+# @pytest.mark.xfail
 @pytest.mark.django_db
 def test_get_wallets(authorized_client):
     """Test get all wallets"""
@@ -43,6 +45,7 @@ def test_get_wallets(authorized_client):
     assert response.status_code == 200
 
 
+# @pytest.mark.xfail
 @pytest.mark.django_db
 def test_get_wallet(authorized_client, created_wallet):
     """Test get a wallet"""
@@ -50,6 +53,7 @@ def test_get_wallet(authorized_client, created_wallet):
     assert response.status_code == 200
 
 
+# @pytest.mark.xfail
 @pytest.mark.django_db
 def test_delete_wallet(authorized_client, created_wallet):
     """Test delete a wallet"""
@@ -57,52 +61,19 @@ def test_delete_wallet(authorized_client, created_wallet):
     assert response.status_code == 204
 
 
+# @pytest.mark.xfail
 @pytest.mark.django_db
-def test_create_transaction(authorized_client, created_wallet):
+@pytest.mark.parametrize("payload, transfer_amount, result",
+                         [({"type": "VISA", "currency": "USD"}, 1.00, 201),  # ok create
+                          ({"type": "VISA", "currency": "RUB"}, 1.00, 400),  # wrong currency
+                          ({"type": "VISA", "currency": "USD"}, 999.00, 400)])  # wrong amount
+def test_create_transaction(payload, transfer_amount, result, authorized_client, created_wallet):
     """Test crete a transaction"""
-    payload = {
-        "type": "VISA",
-        "currency": "USD"
-    }
     sender = authorized_client.post("/wallets/", payload)
-    payload = {
+    post_data = {
         "receiver": created_wallet.data['id'],
         "sender": sender.data['id'],
-        "transfer_amount": 1.00,
+        "transfer_amount": transfer_amount,
     }
-    response = authorized_client.post(f"/wallets/{created_wallet.data['name']}/transactions/", payload)
-    assert response.status_code == 201
-
-
-@pytest.mark.django_db
-def test_create_wrong_currency_transaction(authorized_client, created_wallet):
-    """Test crete a transaction"""
-    payload = {
-        "type": "VISA",
-        "currency": "RUB"
-    }
-    sender = authorized_client.post("/wallets/", payload)
-    payload = {
-        "receiver": created_wallet.data['id'],
-        "sender": sender.data['id'],
-        "transfer_amount": 1.00,
-    }
-    response = authorized_client.post(f"/wallets/{created_wallet.data['name']}/transactions/", payload)
-    assert response.status_code == 400
-
-
-@pytest.mark.django_db
-def test_create_wrong_amount_transaction(authorized_client, created_wallet):
-    """Test crete a transaction"""
-    payload = {
-        "type": "VISA",
-        "currency": "USD"
-    }
-    sender = authorized_client.post("/wallets/", payload)
-    payload = {
-        "receiver": created_wallet.data['id'],
-        "sender": sender.data['id'],
-        "transfer_amount": 999.00,
-    }
-    response = authorized_client.post(f"/wallets/{created_wallet.data['name']}/transactions/", payload)
-    assert response.status_code == 400
+    response = authorized_client.post(f"/wallets/{created_wallet.data['name']}/transactions/", post_data)
+    assert response.status_code == result

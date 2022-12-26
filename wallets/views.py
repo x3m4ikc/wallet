@@ -18,14 +18,18 @@ from wallets.models import Wallet, User, Transaction
 from wallets.serializers import WalletSerializer, UserSerializer, TransactionSerializer
 
 
-@retry(ValueError)
+@retry(ValueError, tries=3)
 def name() -> str:
     """Generate wallet name"""
     letters = string.ascii_uppercase + string.digits
-    res = ''.join(random.choice(letters) for _ in range(8))
+    res = random_letters(letters)
     if not any(digit in res for digit in string.digits):
         raise ValueError("Unacceptable name")
     return res
+
+
+def random_letters(letters):
+    return ''.join(random.choice(letters) for _ in range(8))
 
 
 class WalletViewSet(mixins.CreateModelMixin,
